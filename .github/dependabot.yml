@@ -1,6 +1,7 @@
 version: 2
 updates:
-  # Python - supports hash-pinned requirements.txt
+  # Python - pip-compile manages requirements.txt from requirements.in
+  # Dependabot will update requirements.in and re-run pip-compile to regenerate requirements.txt
   - package-ecosystem: "pip"
     directory: "/python-app"
     schedule:

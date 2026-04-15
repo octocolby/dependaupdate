@@ -8,7 +8,7 @@
   "pinDigests": true,
   "packageRules": [
     {
-      "matchManagers": ["pip_requirements"],
+      "matchManagers": ["pip-compile"],
       "addLabels": ["python"],
       "groupName": "python dependencies"
     },

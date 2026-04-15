@@ -27,8 +27,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install pip-tools
+        run: pip install pip-tools
+
+      - name: Verify lock file is up to date
+        run: |
+          pip-compile --generate-hashes --output-file=requirements.check.txt requirements.in
+          diff requirements.txt requirements.check.txt || \
+            (echo "requirements.txt is out of sync with requirements.in — run pip-compile --generate-hashes requirements.in" && exit 1)
+
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install --require-hashes -r requirements.txt
 
       - name: Run app smoke test
         run: python -c "import app; print('App imports OK')"
