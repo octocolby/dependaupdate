@@ -1,0 +1,54 @@
+version: 2
+updates:
+  # Python - supports hash-pinned requirements.txt
+  - package-ecosystem: "pip"
+    directory: "/python-app"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # .NET
+  - package-ecosystem: "nuget"
+    directory: "/dotnet-app"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "dotnet"
+
+  # Terraform
+  - package-ecosystem: "terraform"
+    directory: "/terraform"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "terraform"
+
+  # GitHub Actions - will update SHA hashes and keep version comments in sync
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Docker - will update image digest SHAs
+  - package-ecosystem: "docker"
+    directory: "/python-app"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/dotnet-app"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "docker"

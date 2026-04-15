@@ -1,0 +1,38 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "schedule": ["every weekend"],
+  "labels": ["dependencies"],
+  "pinDigests": true,
+  "packageRules": [
+    {
+      "matchManagers": ["pip_requirements"],
+      "addLabels": ["python"],
+      "groupName": "python dependencies"
+    },
+    {
+      "matchManagers": ["nuget"],
+      "addLabels": ["dotnet"],
+      "groupName": "dotnet dependencies"
+    },
+    {
+      "matchManagers": ["terraform"],
+      "addLabels": ["terraform"],
+      "groupName": "terraform dependencies"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["github-actions"],
+      "groupName": "github actions",
+      "pinDigests": true
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "addLabels": ["docker"],
+      "groupName": "docker base images",
+      "pinDigests": true
+    }
+  ]
+}

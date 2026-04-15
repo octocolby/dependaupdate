@@ -23,7 +23,7 @@ TestResults/
 
 # Terraform
 .terraform/
-.terraform.lock.hcl
+# Note: .terraform.lock.hcl should be committed — it contains provider hash pins
 *.tfstate
 *.tfstate.backup
 *.tfplan
