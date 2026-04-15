@@ -1,0 +1,44 @@
+name: Python App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "python-app/**"
+      - ".github/workflows/python-app.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "python-app/**"
+      - ".github/workflows/python-app.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run app smoke test
+        run: python -c "import app; print('App imports OK')"
+
+      - name: Build Docker image
+        run: docker build -t python-demo-app:${{ github.sha }} .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name python-demo -p 8080:8080 python-demo-app:${{ github.sha }}
+          sleep 3
+          curl --fail http://localhost:8080/health
+          docker stop python-demo

@@ -1,0 +1,44 @@
+name: .NET App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dotnet-app/**"
+      - ".github/workflows/dotnet-app.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "dotnet-app/**"
+      - ".github/workflows/dotnet-app.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dotnet-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Build Docker image
+        run: docker build -t dotnet-demo-app:${{ github.sha }} .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name dotnet-demo -p 8080:8080 dotnet-demo-app:${{ github.sha }}
+          sleep 5
+          curl --fail http://localhost:8080/health
+          docker stop dotnet-demo
