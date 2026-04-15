@@ -127,22 +127,10 @@ updates:
       - "dependencies"
       - "docker"
 
-  - package-ecosystem: "docker"
-    directory: "/dotnet-app"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 2
-    groups:
-      dotnet-docker-dependencies:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-    labels:
-      - "dependencies"
-      - "docker"
+  # NOTE: mcr.microsoft.com (dotnet-app) is intentionally omitted here.
+  # Dependabot's Docker updater is incompatible with the Microsoft Container Registry (MCR) API
+  # and throws unknown_error when attempting to resolve digest updates for those images.
+  # Renovate handles MCR image updates instead (see renovate.json).
 
   - package-ecosystem: "docker"
     directory: "/nodejs-frontend"
