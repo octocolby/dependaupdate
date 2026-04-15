@@ -7,6 +7,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "python"
@@ -18,6 +25,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      dotnet-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "dotnet"
@@ -29,6 +43,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      terraform-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "terraform"
@@ -40,6 +61,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "github-actions"
@@ -51,6 +79,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      python-docker-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "docker"
@@ -61,6 +96,13 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    groups:
+      dotnet-docker-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"
       - "docker"
