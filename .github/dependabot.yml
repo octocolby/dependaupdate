@@ -5,6 +5,8 @@ updates:
     directory: "/python-app"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "python"
@@ -14,6 +16,8 @@ updates:
     directory: "/dotnet-app"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "dotnet"
@@ -23,6 +27,8 @@ updates:
     directory: "/terraform"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "terraform"
@@ -32,6 +38,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "github-actions"
@@ -41,6 +49,8 @@ updates:
     directory: "/python-app"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "docker"
@@ -49,6 +59,8 @@ updates:
     directory: "/dotnet-app"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 2
     labels:
       - "dependencies"
       - "docker"
