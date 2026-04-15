@@ -26,19 +26,23 @@ jobs:
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
         with:
           version: 10.33.0
+          run_install: false
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
-          cache: "pnpm"
-          cache-dependency-path: nodejs-frontend/pnpm-lock.yaml
 
-      - name: Verify lockfile is up to date
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm install --frozen-lockfile --prod 2>/dev/null || \
-            (echo "pnpm-lock.yaml is out of sync with package.json — run pnpm install and commit the updated lockfile" && exit 1)
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('nodejs-frontend/pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
