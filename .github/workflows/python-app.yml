@@ -28,7 +28,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install --require-hashes -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run app smoke test
         run: python -c "import app; print('App imports OK')"
