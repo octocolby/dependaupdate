@@ -91,6 +91,24 @@ updates:
       - "dependencies"
       - "nodejs"
 
+  # Go modules - go.sum contains hashes for all dependencies
+  - package-ecosystem: "gomod"
+    directory: "/golang-app"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 2
+    groups:
+      golang-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "golang"
+
   # Docker - will update image digest SHAs
   - package-ecosystem: "docker"
     directory: "/python-app"
@@ -134,6 +152,23 @@ updates:
       default-days: 2
     groups:
       nodejs-docker-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/golang-app"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 2
+    groups:
+      golang-docker-dependencies:
         patterns:
           - "*"
         update-types:

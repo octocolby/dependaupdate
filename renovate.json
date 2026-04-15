@@ -23,6 +23,11 @@
       "groupName": "nodejs dependencies"
     },
     {
+      "matchManagers": ["gomod"],
+      "addLabels": ["golang"],
+      "groupName": "golang dependencies"
+    },
+    {
       "matchManagers": ["terraform"],
       "addLabels": ["terraform"],
       "groupName": "terraform dependencies"
