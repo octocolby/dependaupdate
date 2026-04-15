@@ -73,6 +73,24 @@ updates:
       - "dependencies"
       - "github-actions"
 
+  # Node.js / pnpm - dependabot detects pnpm-lock.yaml automatically via the npm ecosystem
+  - package-ecosystem: "npm"
+    directory: "/nodejs-frontend"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 2
+    groups:
+      nodejs-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "nodejs"
+
   # Docker - will update image digest SHAs
   - package-ecosystem: "docker"
     directory: "/python-app"
@@ -99,6 +117,23 @@ updates:
       default-days: 2
     groups:
       dotnet-docker-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  - package-ecosystem: "docker"
+    directory: "/nodejs-frontend"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 2
+    groups:
+      nodejs-docker-dependencies:
         patterns:
           - "*"
         update-types:

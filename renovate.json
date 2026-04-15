@@ -18,6 +18,11 @@
       "groupName": "dotnet dependencies"
     },
     {
+      "matchManagers": ["npm"],
+      "addLabels": ["nodejs"],
+      "groupName": "nodejs dependencies"
+    },
+    {
       "matchManagers": ["terraform"],
       "addLabels": ["terraform"],
       "groupName": "terraform dependencies"

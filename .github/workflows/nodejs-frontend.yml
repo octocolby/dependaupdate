@@ -1,0 +1,54 @@
+name: Node.js Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "nodejs-frontend/**"
+      - ".github/workflows/nodejs-frontend.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "nodejs-frontend/**"
+      - ".github/workflows/nodejs-frontend.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nodejs-frontend
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: 10.33.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: nodejs-frontend/pnpm-lock.yaml
+
+      - name: Verify lockfile is up to date
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --prod 2>/dev/null || \
+            (echo "pnpm-lock.yaml is out of sync with package.json — run pnpm install and commit the updated lockfile" && exit 1)
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Docker image
+        run: docker build -t nodejs-frontend:${{ github.sha }} .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name nodejs-frontend -p 3000:3000 nodejs-frontend:${{ github.sha }}
+          sleep 3
+          curl --fail http://localhost:3000/health
+          docker stop nodejs-frontend
