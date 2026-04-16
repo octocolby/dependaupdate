@@ -1,4 +1,12 @@
 version: 2
+
+registries:
+  dockerhub:
+    type: docker-registry
+    url: https://registry.hub.docker.com
+    username: ${{ secrets.DOCKERHUB_USERNAME }}
+    password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
 updates:
   # Python - pip-compile manages requirements.txt from requirements.in
   # Dependabot will update requirements.in and re-run pip-compile to regenerate requirements.txt
@@ -116,6 +124,8 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    registries:
+      - dockerhub
     groups:
       python-docker-dependencies:
         patterns:
@@ -138,6 +148,8 @@ updates:
       interval: "weekly"
     cooldown:
       default-days: 2
+    registries:
+      - dockerhub
     groups:
       nodejs-docker-dependencies:
         patterns:
