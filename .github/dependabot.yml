@@ -8,9 +8,8 @@ registries:
     password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
 updates:
-  # Python - pip-compile manages requirements.txt from requirements.in
-  # Dependabot will update requirements.in and re-run pip-compile to regenerate requirements.txt
-  - package-ecosystem: "pip"
+  # Python - uv manages dependencies via pyproject.toml and uv.lock
+  - package-ecosystem: "uv"
     directory: "/python-app"
     schedule:
       interval: "weekly"
