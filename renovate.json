@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "schedule": ["every weekend"],
+  "schedule": ["every day"],
   "labels": ["dependencies"],
   "pinDigests": true,
   "minimumReleaseAge": "2 days",
