@@ -2,7 +2,7 @@ name: Renovate
 
 on:
   schedule:
-    - cron: "0 3 * * *" # Every day at 03:00 UTC
+    - cron: "0 0 * * *" # Every day at 00:00 UTC
   workflow_dispatch: # Allow manual trigger from the Actions tab
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
-      workflows: write
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
