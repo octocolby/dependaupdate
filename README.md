@@ -22,27 +22,23 @@ This repo shows how to do that across five ecosystems and how to keep those hash
 
 ### Python (`python-app/`)
 
-`pip-tools` is used to manage dependencies. You declare direct dependencies in `requirements.in` and run `pip-compile --generate-hashes` to produce `requirements.txt` — a fully resolved lockfile containing `sha256` hashes for every package, including transitive dependencies.
+`uv` is used to manage dependencies. Direct dependencies are declared in `pyproject.toml` and `uv.lock` is the fully resolved lockfile, containing `sha256` hashes for every package including transitive dependencies.
 
 ```
-# requirements.in  ← you edit this
-flask
+# pyproject.toml  ← you edit this
+dependencies = ["flask", "boto3", "gunicorn"]
 
-# requirements.txt  ← generated, committed, never edited by hand
-flask==3.1.3 \
-    --hash=sha256:0ef0e52...
-werkzeug==3.1.8 \
-    --hash=sha256:63a77fb...
-    # via flask
+# uv.lock  ← generated, committed, never edited by hand
+[[package]]
+name = "flask"
+version = "3.1.3"
+...
+wheels = [
+  { url = "...", hash = "sha256:0ef0e52..." },
+]
 ```
 
-The Docker build uses `pip install --require-hashes -r requirements.txt`, which makes pip verify every hash and refuse to install anything not listed. CI also regenerates the lockfile and diffs it to catch any drift between `requirements.in` and `requirements.txt`.
-
-To update the lockfile locally:
-```sh
-pip install pip-tools
-pip-compile --generate-hashes requirements.in
-```
+The Docker build uses `uv sync --frozen --no-dev`, which installs exactly what is in the lockfile and fails if it is out of sync with `pyproject.toml`.
 
 ### .NET (`dotnet-app/`)
 
@@ -130,6 +126,176 @@ provider "registry.terraform.io/hashicorp/null" {
 }
 ```
 
+## Local development
+
+Each app can be run locally without Docker. Each app directory contains a `Makefile` with `install` and `run` targets that always use the strict frozen/locked mode for that ecosystem:
+
+```sh
+cd python-app && make install && make run
+cd dotnet-app && make install && make run
+cd nodejs-frontend && make install && make run
+cd golang-app && make install && make run
+cd terraform && make install
+```
+
+The lockfile enforcement is also baked in at the config level where the toolchain supports it — so even running the tool directly will fail fast rather than silently fetching latest:
+
+| Ecosystem | Enforcement mechanism |
+|-----------|----------------------|
+| Python | `uv sync --frozen` in Makefile — no config-file equivalent |
+| .NET | `dotnet restore --locked-mode` in Makefile — no config-file equivalent |
+| Node.js | `frozen-lockfile=true` in `.npmrc` — `pnpm install` enforces this automatically |
+| Go | `GOFLAGS=-mod=readonly` in `golang-app/.envrc` (loaded by [direnv](https://direnv.net/)) — prevents implicit `go.mod`/`go.sum` changes during builds |
+| Terraform | `terraform init -lockfile=readonly` in Makefile — no config-file equivalent |
+
+The commands below show how to run and update each app.
+
+### Python (`python-app/`)
+
+[Install uv](https://docs.astral.sh/uv/getting-started/installation/) then:
+
+```sh
+cd python-app
+
+# Install dependencies from the lockfile — fails if uv.lock is out of sync
+uv sync --frozen --no-dev
+
+# Run the app
+uv run gunicorn --bind 0.0.0.0:8080 app:app
+```
+
+**Adding a new dependency:**
+```sh
+uv add flask                 # updates pyproject.toml and regenerates uv.lock with hashes
+uv sync --frozen --no-dev    # verify the lockfile installs cleanly
+```
+
+**Upgrading a dependency:**
+```sh
+uv lock --upgrade-package flask   # bumps flask to latest, updates hashes in uv.lock
+uv sync --frozen --no-dev
+```
+
+### .NET (`dotnet-app/`)
+
+```sh
+cd dotnet-app
+
+# Restore packages — generates packages.lock.json on first run, then verifies hashes on subsequent runs
+dotnet restore
+
+# Run the app
+dotnet run
+```
+
+In CI, use `dotnet restore --locked-mode` to prevent the lockfile from being updated — it will fail if `packages.lock.json` is out of sync with the `.csproj`.
+
+**Adding a new dependency:**
+```sh
+dotnet add package AWSSDK.S3   # updates the .csproj
+dotnet restore                  # regenerates packages.lock.json with the new package's hashes
+```
+
+**Upgrading a dependency:**
+```sh
+# Edit the version in dotnet-app.csproj, then:
+dotnet restore   # updates packages.lock.json with the new hashes
+```
+
+### Node.js (`nodejs-frontend/`)
+
+[Enable corepack](https://nodejs.org/api/corepack.html) so the pinned pnpm version from `package.json` is used automatically:
+
+```sh
+corepack enable
+
+cd nodejs-frontend
+
+# Install from the lockfile — fails if pnpm-lock.yaml is out of sync with package.json
+pnpm install --frozen-lockfile
+
+# Run the app
+pnpm start
+```
+
+**Adding a new dependency:**
+```sh
+pnpm add express   # updates package.json and pnpm-lock.yaml with integrity hashes
+```
+
+**Upgrading a dependency:**
+```sh
+pnpm update express          # bumps to latest within the declared range
+pnpm update express@6.0.0    # pin to a specific version
+```
+
+The `.npmrc` in the project sets `save-exact=true`, so `pnpm add` always writes an exact version (no `^` or `~`), which keeps pnpm-lock.yaml as the single source of truth for the resolved version.
+
+### Go (`golang-app/`)
+
+```sh
+cd golang-app
+
+# Download modules — go.sum hashes are verified automatically
+go mod download
+
+# Run the app
+go run .
+```
+
+**Adding a new dependency:**
+```sh
+go get github.com/some/module@v1.2.3   # adds to go.mod and updates go.sum with h1: hashes
+go mod tidy                             # removes unused entries
+```
+
+**Upgrading a dependency:**
+```sh
+go get github.com/some/module@latest
+go mod tidy
+```
+
+Verify all downloaded modules match `go.sum` at any time with:
+```sh
+go mod verify
+```
+
+### Terraform (`terraform/`)
+
+```sh
+cd terraform
+
+# Initialise — downloads providers and writes/verifies .terraform.lock.hcl
+terraform init
+
+terraform plan
+terraform apply
+```
+
+**Upgrading a provider:**
+```sh
+# Edit the required_providers version constraint in main.tf, then:
+terraform init -upgrade   # updates .terraform.lock.hcl with new hashes
+```
+
+---
+
+## Testing dependency upgrades locally
+
+When Dependabot or Renovate opens an upgrade PR, you can test it locally before merging:
+
+```sh
+git fetch origin
+git checkout <branch-name>   # e.g. renovate/python-dependencies or dependabot/pip/python-app/boto3-1.2.3
+
+# Then run the relevant install command from above, e.g. for Python:
+cd python-app && uv sync --frozen --no-dev
+```
+
+If you want to test an upgrade before an automated PR arrives, manually bump the version in the manifest file (e.g. `pyproject.toml`, `go.mod`, `dotnet-app.csproj`) and run the corresponding update command to regenerate the lockfile. The hash in the lockfile will change to reflect the new package contents — review that diff before committing.
+
+---
+
 ## Automated updates
 
 Both Dependabot and Renovate are configured to raise PRs when newer versions are available. They update the version **and** the hash together in the same PR, so the security guarantee is maintained automatically.
@@ -138,7 +304,7 @@ Both Dependabot and Renovate are configured to raise PRs when newer versions are
 
 | Ecosystem | Directory | Notes |
 |-----------|-----------|-------|
-| `pip` | `python-app/` | Updates `requirements.in` and regenerates `requirements.txt` |
+| `pip` | `python-app/` | Updates `pyproject.toml` and regenerates `uv.lock` with new hashes |
 | `nuget` | `dotnet-app/` | Updates `.csproj` and `packages.lock.json` |
 | `npm` | `nodejs-frontend/` | Detects `pnpm-lock.yaml` and updates it automatically |
 | `gomod` | `golang-app/` | Updates `go.mod` and `go.sum` |
